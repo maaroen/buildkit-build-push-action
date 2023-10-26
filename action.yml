@@ -1,0 +1,45 @@
+# action.yml
+name: 'Buildkit build and push image'
+description: 'Build docker image using buildkits buildctl'
+inputs:
+  context-folder:
+    description: 'Folder to use as context during image build'
+    required: false
+    default: '.'
+  dockerfile-folder:
+    description: 'Location of the Dockerfile to build the image'
+    required: false
+    default: '.'
+  platforms:
+    description: 'Platform(s) that the image should be build for, multiple platforms can be specified comma separated (linux/amd64,linux/arm64)'
+    required: true
+    default: ''
+  dockerfile-name:
+    description: 'Name of the Dockerfile to use for the build'
+    required: false
+    default: 'Dockerfile'
+  tags:
+    description: 'Tags to build to the image'
+    required: true
+    default: ''
+  buildkit-daemon-address:
+    description: 'Address of the buildkit daemon to use'
+    required: true
+    default: ''
+#outputs:
+#  time: # id of output
+#    description: 'The time we greeted you'
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        buildctl \
+        --addr ${{ inputs.buildkit-daemon-address }} \
+        build \
+        --frontend dockerfile.v0 \
+        --local context=${{ inputs.context-folder }} \
+        --local dockerfile=${{ inputs.dockerfile-folder }} \
+        --opt platform=${{ inputs.platforms }} \
+        --opt filename=${{ inputs.dockerfile-name }} \
+        --output type=image,\"name=$(echo "${{ inputs.tags }}" | paste -sd ',' -)\",push=true
