@@ -47,8 +47,15 @@ jobs:
 
 In the example above I'm also using the [docker/metadata-action](https://github.com/docker/metadata-action) to generate the tags. This can be skipped, but then the tags should be passed as a string, with each tag on a new line, for example:
 ```
-user/app:latest
-user/app:1.0.0
+- name: Build image
+        uses: maaroen/buildkit-build-push-action@main
+        with:
+            platforms: 'linux/amd64'
+            tags: |
+              user/app:latest
+              user/app:1.0.0
+            buildkit-daemon-address: 'tcp://buildkitd:1234'   
+
 ```
 
 # Customizing
