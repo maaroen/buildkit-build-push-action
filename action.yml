@@ -29,6 +29,10 @@ inputs:
     description: 'Address of the buildkit daemon to use'
     required: true
     default: ''
+  push:
+    description: 'Defines whether the image should be pushed to the registry or not, default is true'
+    required: false
+    default: true
 runs:
   using: 'composite'
   steps:
@@ -42,4 +46,4 @@ runs:
         --local dockerfile=${{ inputs.dockerfile-folder }} \
         --opt platform=${{ inputs.platforms }} \
         --opt filename=${{ inputs.dockerfile-name }} \
-        --output type=image,\"name=$(echo "${{ inputs.tags }}" | paste -sd ',' -)\",push=true
+        --output type=image,\"name=$(echo "${{ inputs.tags }}" | paste -sd ',' -)\",push=${{ inputs.push }}
