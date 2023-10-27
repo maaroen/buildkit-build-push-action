@@ -83,3 +83,4 @@ Following inputs can be used as `step.with` keys
 | `dockerfile-name`   | String      | Name of the Dockerfile to use for the build |
 | `tags`   | List      | Name of the Dockerfile to use for the build (You can use the tags output from docker/metadata-action as input  |
 | `buildkit-daemon-address`   | String      | Address of the buildkit daemon to use (for example tcp://buildkitd:1234 |
+| `push` | Boolean | Defines wether the image should be pushed to the registry or not, default is true |
