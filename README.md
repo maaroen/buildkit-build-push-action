@@ -45,7 +45,7 @@ jobs:
 
 ## Without using docker/metadata-action
 
-In the example above I'm also using the [docker/metadata-action](https://github.com/docker/metadata-action) to generate the tags. This can be skipped, but then the tags should be passed as a string, with each tag on a new line, for example:
+In the example above I'm using the [docker/metadata-action](https://github.com/docker/metadata-action) to generate the tags. This can be skipped, but then the tags should be passed as a string, with each tag on a new line, for example:
 ```
 - name: Build image
         uses: maaroen/buildkit-build-push-action@main
