@@ -1,6 +1,9 @@
 # action.yml
 name: 'Buildkit build and push image'
 description: 'Build docker image using buildkits buildctl'
+branding:
+  icon: 'anchor'
+  color: 'blue'
 inputs:
   context-folder:
     description: 'Folder to use as context during image build'
@@ -26,9 +29,6 @@ inputs:
     description: 'Address of the buildkit daemon to use'
     required: true
     default: ''
-#outputs:
-#  time: # id of output
-#    description: 'The time we greeted you'
 runs:
   using: 'composite'
   steps:
