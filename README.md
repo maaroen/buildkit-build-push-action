@@ -5,29 +5,47 @@ GitHub action to build container images using [Moby Buildkit](https://github.com
 
 This task can be used on it's own, or in combination with [docker/metadata-action](https://github.com/docker/metadata-action)
 
-## Using docker/metadata-action
-You could use this step to generate the tags:
+## Example
 ```
-env: 
+name: Gitea Actions
+run-name: Build image🚀
+on: [push]
+
+jobs:
+  push_to_registry:
+    runs-on: ubuntu-latest
+    container: 
+      image: maaroen/act-runner-buildkit-kubectl
+    env: 
       DOCKER_CONFIG: "~/.docker/"
-      IMAGE_REPOSITORY: git.nederlof.dev/maaroen/minecraft-servers/vault-hunters/third-edition
+      IMAGE_REPOSITORY: registry/imagename
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # all history for all branches and tags    
+          fetch-depth: 0 # all history for all branches and tags                
       - name: Generate Docker metadata
         id: meta
         uses: docker/metadata-action@v3
         with:
           images: |
-            ${{ env.IMAGE_REPOSITORY }}            
+            ${{ env.IMAGE_REPOSITORY }}                        
           tags: |
-            type=semver,pattern={{version}}            
+            type=semver,pattern={{version}}                        
           flavor: |
-            latest=true            
+            latest=true                        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build image
+        uses: maaroen/buildkit-build-push-action@main
+        with:
+            platforms: 'linux/amd64'
+            tags: ${{ steps.meta.outputs.tags }}
+            buildkit-daemon-address: 'tcp://buildkitd:1234'   
 ```
-After this step with id `meta` you can access the tags like this: `${{ steps.meta.outputs.tags }}` and pass them to this buildkit action.
 
 ## Without using docker/metadata-action
 The expected format
