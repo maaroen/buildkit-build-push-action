@@ -33,11 +33,15 @@ inputs:
     description: 'Defines whether the image should be pushed to the registry or not, default is true'
     required: false
     default: true
+  build-args:
+    description: 'Build arguments to be passed to the build'
+    required: false
 runs:
   using: 'composite'
   steps:
     - shell: bash
       run: |
+        echo "${{ inputs.build-args }}" | sed -r '/^\s*$/d' - | sed -r 's/(.*)/--opt build-arg:\1 \\/' - &&
         buildctl \
         --addr ${{ inputs.buildkit-daemon-address }} \
         build \
@@ -45,5 +49,6 @@ runs:
         --local context=${{ inputs.context-folder }} \
         --local dockerfile=${{ inputs.dockerfile-folder }} \
         --opt platform=${{ inputs.platforms }} \
+        $(echo "${{ inputs.build-args }}" | sed -r '/^\s*$/d' - | sed -r 's/(.*)/--opt build-arg:\1 \\/' -) \
         --opt filename=${{ inputs.dockerfile-name }} \
-        --output type=image,\"name=$(echo "${{ inputs.tags }}" | paste -sd ',' -)\",push=${{ inputs.push }}
+        --output type=image,\"name=$(echo "${{ inputs.tags }}" | paste -sd ',' -)\",push=${{ inputs.push }}        
