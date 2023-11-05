@@ -40,7 +40,10 @@ jobs:
         with:
             platforms: 'linux/amd64'
             tags: ${{ steps.meta.outputs.tags }}
-            buildkit-daemon-address: 'tcp://buildkitd:1234'   
+            buildkit-daemon-address: 'tcp://buildkitd:1234'
+            build-args: |
+               TEST=value
+               TEST2=value2
 ```
 
 ## Without using docker/metadata-action
@@ -84,3 +87,4 @@ Following inputs can be used as `step.with` keys
 | `tags`   | List      | Name of the Dockerfile to use for the build (You can use the tags output from docker/metadata-action as input  |
 | `buildkit-daemon-address`   | String      | Address of the buildkit daemon to use (for example tcp://buildkitd:1234 |
 | `push` | Boolean | Defines wether the image should be pushed to the registry or not, default is true |
+| `build-args` | List | The build arguments that are required for building the image |
