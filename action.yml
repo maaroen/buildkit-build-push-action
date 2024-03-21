@@ -41,7 +41,7 @@ inputs:
     required: false
     default: true
   cache-mode:
-    description: 'Wither to use min or max mode for caching (max caches all layers, min the resulting image)'
+    description: 'Wether to use min or max mode for caching (max caches all layers, min the resulting image)'
     required: false
     default: 'max'
 runs:
