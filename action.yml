@@ -36,19 +36,44 @@ inputs:
   build-args:
     description: 'Build arguments to be passed to the build'
     required: false
+  use-registry-cache:
+    description: 'Wether to cache layers in a registry for faster subsequent builds'
+    required: false
+    default: true
+  cache-mode:
+    description: 'Wither to use min or max mode for caching (max caches all layers, min the resulting image)'
+    required: false
+    default: 'max'
 runs:
   using: 'composite'
   steps:
     - shell: bash
       run: |
-        echo "${{ inputs.build-args }}" | sed -r '/^\s*$/d' - | sed -r 's/(.*)/--opt build-arg:\1 \\/' - &&
-        buildctl \
-        --addr ${{ inputs.buildkit-daemon-address }} \
-        build \
-        --frontend dockerfile.v0 \
-        --local context=${{ inputs.context-folder }} \
-        --local dockerfile=${{ inputs.dockerfile-folder }} \
-        --opt platform=${{ inputs.platforms }} \
-        $(echo "${{ inputs.build-args }}" | sed -r '/^\s*$/d' - | sed -r 's/(.*)/--opt build-arg:\1 \\/' -) \
-        --opt filename=${{ inputs.dockerfile-name }} \
-        --output type=image,\"name=$(echo "${{ inputs.tags }}" | paste -sd ',' -)\",push=${{ inputs.push }}        
+        touch script.sh
+        
+        printf 'buildctl' > script.sh
+        printf ' --addr ${{ inputs.buildkit-daemon-address }}' >> script.sh
+        printf ' build' >> script.sh
+        printf ' --frontend dockerfile.v0' >> script.sh
+        printf ' --local context=${{ inputs.context-folder }}' >> script.sh
+        printf ' --local dockerfile=${{ inputs.dockerfile-folder }}' >> script.sh
+        printf ' --opt filename=${{ inputs.dockerfile-name }}' >> script.sh
+        printf ' --opt platform=${{ inputs.platforms }}' >> script.sh
+        
+        export BUILD_ARGS=$(echo "${{ inputs.build-args }}" | sed -r "/^\s*$/d" - | sed ':a; N; $!ba; s/\n/ --opt build-arg:/g' -)
+        if [[ -n "$BUILD_ARGS" ]]; then
+          printf " --opt build-arg:$(echo "$BUILD_ARGS")" >> script.sh
+        fi
+
+        if [[ ${{ inputs.use-registry-cache }} == true ]]; then
+          export BUILDCACHE_URL=$(echo "${{ inputs.tags }}" | head -1 - | sed -r "s/\:.*/:buildcache/" -)
+
+          printf ' --export-cache type=registry,mode=${{ inputs.cache-mode }},image-manifest=true,oci-mediatypes=true,ref=$(echo $BUILDCACHE_URL)' >> script.sh
+          printf ' --import-cache type=registry,mode=${{ inputs.cache-mode }},image-manifest=true,oci-mediatypes=true,ref=$(echo $BUILDCACHE_URL)' >> script.sh
+        fi
+
+        printf ' --output type=image,\\\"name=$(echo "${{ inputs.tags }}" | paste -sd "," -)\\\",push=${{ inputs.push }}' >> script.sh
+        cat script.sh
+        
+        chmod +x script.sh
+        ./script.sh        
