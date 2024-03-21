@@ -44,6 +44,9 @@ jobs:
             build-args: |
                TEST=value
                TEST2=value2
+            use-registry-cache: true
+            cache-mode: 'max'
+
 ```
 
 ## Without using docker/metadata-action
@@ -88,3 +91,5 @@ Following inputs can be used as `step.with` keys
 | `buildkit-daemon-address`   | String      | Address of the buildkit daemon to use (for example tcp://buildkitd:1234 |
 | `push` | Boolean | Defines wether the image should be pushed to the registry or not, default is true |
 | `build-args` | List | The build arguments that are required for building the image |
+| `use-registry-cache` | Boolean | Wether to cache layers in a registry for faster subsequent builds (Default true) |
+| `cache-mode` | String | Wether to use min or max mode for caching (max caches all layers, min only the resulting image) |
